@@ -7,6 +7,7 @@ int get_int(const char* prompt) {
     int value;
     printf("%s", prompt);
     scanf("%d", &value);
+    getchar();
     return value;
 }
 
@@ -14,12 +15,12 @@ float get_float(const char* prompt) {
     float value;
     printf("%s", prompt);
     scanf("%f", &value);
+    getchar();
     return value;
 }
 
 void get_string(const char* prompt, char* buffer, int size) {
     printf("%s", prompt);
-    fflush(stdin);
     fgets(buffer, size, stdin);
     buffer[strcspn(buffer, "\n")] = '\0';
 }
@@ -28,6 +29,7 @@ int get_choice(int min, int max) {
     int choice;
     printf("请选择 (%d-%d): ", min, max);
     scanf("%d", &choice);
+    getchar();
     if (choice < min || choice > max) {
         return -1;
     }

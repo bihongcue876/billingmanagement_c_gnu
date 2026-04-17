@@ -9,7 +9,7 @@ gcc -std=c99 -Wall -Wextra -Iinclude ^
     src\fileio.c ^
     src\loginout.c ^
     src\finance.c ^
-    src\query.c ^
+    src\crud.c ^
     src\utils.c ^
     -o app.exe -lws2_32
 if %errorlevel% equ 0 (

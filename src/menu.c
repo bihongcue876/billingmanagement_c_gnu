@@ -39,6 +39,7 @@ void card_list_menu(void) {
             case 1:
                 printf("\n注册新卡\n");
                 get_string("请输入卡号: ", cardId, sizeof(cardId));
+                printf("\n");
                 get_string("请输入密码: ", password, sizeof(password));
                 
                 Account acc;
@@ -103,7 +104,7 @@ void card_list_menu(void) {
                 if (card_delete(cardId)) {
                     printf("注销成功！\n");
                 } else {
-                    printf("注销失败，卡号不存在！\n");
+                    printf("账户不存在！\n");
                 }
                 break;
         }
@@ -146,7 +147,7 @@ void card_file_menu(void) {
                         float amount = get_float("请输入充值金额: ");
                         recharge(cardId, amount);
                     } else {
-                        printf("卡号不存在！\n");
+                        printf("账户不存在！\n");
                     }
                 }
                 break;
@@ -160,7 +161,7 @@ void card_file_menu(void) {
                         float amount = get_float("请输入退费金额: ");
                         refund(cardId, amount);
                     } else {
-                        printf("卡号不存在！\n");
+                        printf("账户不存在！\n");
                     }
                 }
                 break;
@@ -220,7 +221,7 @@ void finance_menu(void) {
                         float amount = get_float("请输入充值金额: ");
                         recharge(cardId, amount);
                     } else {
-                        printf("卡号不存在！\n");
+                        printf("账户不存在！\n");
                     }
                 }
                 break;
@@ -234,7 +235,7 @@ void finance_menu(void) {
                         float amount = get_float("请输入退费金额: ");
                         refund(cardId, amount);
                     } else {
-                        printf("卡号不存在！\n");
+                        printf("账户不存在！\n");
                     }
                 }
                 break;
