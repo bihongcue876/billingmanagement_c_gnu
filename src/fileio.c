@@ -207,13 +207,33 @@ void log_query(const char* queryType, const char* cardId, const char* result) {
     char timeStr[64];
     strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", t);
     
-    char logLine[256];
+    char logLine[512];
     sprintf(logLine, "[%s] 查询类型: %s, 卡号: %s, 结果: %s\n", 
             timeStr, queryType, cardId, result);
     
     printf("%s", logLine);
     
-    FILE* fp = fopen(QUERY_LOG_FILE, "a");
+    if (strstr(queryType, "上下机") == NULL && strstr(queryType, "营业额") == NULL) {
+        return;
+    }
+    
+    char logFile[64];
+    int year = t->tm_year + 1900;
+    if (strstr(queryType, "上下机") != NULL) {
+        sprintf(logFile, "uselog%d.log", year);
+    } else {
+        sprintf(logFile, "sales%d.log", year);
+    }
+    
+    FILE* fp = fopen(logFile, "r");
+    if (!fp) {
+        fp = fopen(logFile, "w");
+        if (!fp) return;
+        fprintf(fp, "\xEF\xBB\xBF");
+        fclose(fp);
+    }
+    
+    fp = fopen(logFile, "a");
     if (!fp) return;
     
     fprintf(fp, "%s", logLine);

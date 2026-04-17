@@ -6,13 +6,14 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
 
 void crud_menu(void) {
     while (1) {
         printf("\n=== 增删改查 ===\n");
         printf("1. 查询所有卡\n");
         printf("2. 查询上下机记录\n");
-        printf("3. 查询财务记录\n");
+        printf("3. 查询营业额记录\n");
         printf("4. 用户全记录\n");
         printf("5. 详细记录\n");
         printf("0. 返回\n");
@@ -90,11 +91,18 @@ void crud_finance_records(void) {
     int count = 0;
     
     while (p) {
-        printf("卡号: %s, 类型: %s, 金额: %.2f, 余额: %.2f\n",
+        char timeStr[32] = "";
+        if (strlen(p->data.time) > 0) {
+            time_t t = atol(p->data.time);
+            struct tm* timeinfo = localtime(&t);
+            strftime(timeStr, sizeof(timeStr), "%Y/%m/%d %H:%M:%S", timeinfo);
+        }
+        printf("卡号: %s, 类型: %s, 金额: %.2f, 余额: %.2f, 时间: %s\n",
                p->data.cardId,
                p->data.type == 1 ? "充值" : (p->data.type == 2 ? "退费" : "消费"),
                p->data.amount,
-               p->data.balanceAfter);
+               p->data.balanceAfter,
+               timeStr);
         count++;
         p = p->next;
     }
@@ -102,7 +110,7 @@ void crud_finance_records(void) {
     
     char result[32];
     sprintf(result, "查询到 %d 条记录", count);
-    log_query("查询财务记录", "ALL", result);
+    log_query("查询营业额记录", "ALL", result);
 }
 
 void crud_user_logs(void) {
@@ -221,11 +229,17 @@ void crud_user_detail(void) {
     
     while (fins) {
         if (strcmp(fins->data.cardId, cardId) == 0) {
+            char timeStr[32] = "";
+            if (strlen(fins->data.time) > 0) {
+                time_t t = atol(fins->data.time);
+                struct tm* timeinfo = localtime(&t);
+                strftime(timeStr, sizeof(timeStr), "%Y/%m/%d %H:%M:%S", timeinfo);
+            }
             printf("类型: %s, 金额: %.2f, 余额: %.2f, 时间: %s\n",
                    fins->data.type == 1 ? "充值" : (fins->data.type == 2 ? "退费" : "消费"),
                    fins->data.amount,
                    fins->data.balanceAfter,
-                   fins->data.time);
+                   timeStr);
             if (fins->data.type == 1) totalRecharge += fins->data.amount;
             else if (fins->data.type == 2) totalRefund += fins->data.amount;
             financeCount++;
