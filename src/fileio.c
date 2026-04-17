@@ -104,26 +104,22 @@ int load_billing(BillingStandard* standards, int* count) {
 
 int save_admins(Admin* admins, int count) {
     ensure_data_dir();
-    FILE* fp = fopen(ADMIN_FILE, "w");
+    FILE* fp = fopen(ADMIN_FILE, "wb");
     if (!fp) return 0;
     
-    for (int i = 0; i < count; i++) {
-        fprintf(fp, "%s %s %s\n", admins[i].username, admins[i].password, admins[i].createTime);
-    }
+    fwrite(&count, sizeof(int), 1, fp);
+    fwrite(admins, sizeof(Admin), count, fp);
     
     fclose(fp);
     return count;
 }
 
 int load_admins(Admin* admins, int* count) {
-    FILE* fp = fopen(ADMIN_FILE, "r");
+    FILE* fp = fopen(ADMIN_FILE, "rb");
     if (!fp) return 0;
     
-    *count = 0;
-    while (fscanf(fp, "%s %s %s", admins[*count].username, admins[*count].password, admins[*count].createTime) == 3) {
-        (*count)++;
-        if (*count >= 10) break;
-    }
+    fread(count, sizeof(int), 1, fp);
+    fread(admins, sizeof(Admin), *count, fp);
     
     fclose(fp);
     return *count;
