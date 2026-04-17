@@ -7,5 +7,7 @@ void crud_menu(void);
 void crud_all_cards(void);
 void crud_all_logs(void);
 void crud_finance_records(void);
+void crud_user_logs(void);
+void crud_user_detail(void);
 
 #endif

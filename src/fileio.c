@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 void ensure_data_dir(void) {
     system("if not exist data mkdir data");
@@ -198,4 +199,24 @@ LogInfoNode* load_loginfo(void) {
     
     fclose(fp);
     return head;
+}
+
+void log_query(const char* queryType, const char* cardId, const char* result) {
+    time_t now = time(NULL);
+    struct tm* t = localtime(&now);
+    char timeStr[64];
+    strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", t);
+    
+    char logLine[256];
+    sprintf(logLine, "[%s] 查询类型: %s, 卡号: %s, 结果: %s\n", 
+            timeStr, queryType, cardId, result);
+    
+    printf("%s", logLine);
+    
+    FILE* fp = fopen(QUERY_LOG_FILE, "a");
+    if (!fp) return;
+    
+    fprintf(fp, "%s", logLine);
+    
+    fclose(fp);
 }

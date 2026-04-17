@@ -10,6 +10,7 @@
 #define LOGINOUT_FILE DATA_DIR "loginout.bin"
 #define BILLING_FILE DATA_DIR "billing.txt"
 #define ADMIN_FILE DATA_DIR "admins.bin"
+#define QUERY_LOG_FILE "query.log"
 
 void ensure_data_dir(void);
 int save_accounts(AccountNode* head);
@@ -22,5 +23,6 @@ int save_billing(BillingStandard* standards, int count);
 int load_billing(BillingStandard* standards, int* count);
 int save_admins(Admin* admins, int count);
 int load_admins(Admin* admins, int* count);
+void log_query(const char* queryType, const char* cardId, const char* result);
 
 #endif
