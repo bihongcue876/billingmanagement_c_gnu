@@ -208,32 +208,24 @@ void log_query(const char* queryType, const char* cardId, const char* result) {
     strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", t);
     
     char logLine[512];
-    sprintf(logLine, "[%s] 查询类型: %s, 卡号: %s, 结果: %s\n", 
+    sprintf(logLine, "[%s] QueryType: %s, Card: %s, Result: %s\n", 
             timeStr, queryType, cardId, result);
     
     printf("%s", logLine);
     
-    if (strstr(queryType, "上下机") == NULL && strstr(queryType, "营业额") == NULL) {
+    if (strstr(queryType, "UseLog") == NULL && strstr(queryType, "Sales") == NULL) {
         return;
     }
     
     char logFile[64];
     int year = t->tm_year + 1900;
-    if (strstr(queryType, "上下机") != NULL) {
+    if (strstr(queryType, "UseLog") != NULL) {
         sprintf(logFile, "uselog%d.log", year);
     } else {
         sprintf(logFile, "sales%d.log", year);
     }
     
-    FILE* fp = fopen(logFile, "r");
-    if (!fp) {
-        fp = fopen(logFile, "w");
-        if (!fp) return;
-        fprintf(fp, "\xEF\xBB\xBF");
-        fclose(fp);
-    }
-    
-    fp = fopen(logFile, "a");
+    FILE* fp = fopen(logFile, "a");
     if (!fp) return;
     
     fprintf(fp, "%s", logLine);

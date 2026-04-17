@@ -61,8 +61,8 @@ void crud_all_cards(void) {
     printf("共 %d 张卡\n", count);
     
     char result[32];
-    sprintf(result, "查询到 %d 张卡", count);
-    log_query("查询所有卡", "ALL", result);
+    sprintf(result, "Found %d cards", count);
+    log_query("QueryAllCards", "ALL", result);
 }
 
 void crud_all_logs(void) {
@@ -70,19 +70,36 @@ void crud_all_logs(void) {
     LogInfoNode* p = load_loginfo();
     int count = 0;
     
+    time_t now = time(NULL);
+    struct tm* t = localtime(&now);
+    int year = t->tm_year + 1900;
+    char logFile[64];
+    sprintf(logFile, "uselog%d.log", year);
+    FILE* fp = fopen(logFile, "a");
+    if (fp) {
+        fprintf(fp, "\n=== UseLog Query ===\n");
+    }
+    
     while (p) {
-        printf("卡号: %s, 消费: %.2f, 余额: %.2f\n",
+        char line[128];
+        sprintf(line, "Card: %s, Amount: %.2f, Balance: %.2f\n",
                p->data.aCardName,
                p->data.fAmount,
                p->data.fBalance);
+        printf("%s", line);
+        if (fp) fprintf(fp, "%s", line);
         count++;
         p = p->next;
     }
     printf("共 %d 条记录\n", count);
+    if (fp) {
+        fprintf(fp, "Total: %d records\n", count);
+        fclose(fp);
+    }
     
     char result[32];
-    sprintf(result, "查询到 %d 条记录", count);
-    log_query("查询上下机记录", "ALL", result);
+    sprintf(result, "Found %d records", count);
+    log_query("UseLog", "ALL", result);
 }
 
 void crud_finance_records(void) {
@@ -90,27 +107,49 @@ void crud_finance_records(void) {
     FinanceNode* p = finance_get_head();
     int count = 0;
     
+    time_t now = time(NULL);
+    struct tm* t = localtime(&now);
+    int year = t->tm_year + 1900;
+    char logFile[64];
+    sprintf(logFile, "sales%d.log", year);
+    FILE* fp = fopen(logFile, "a");
+    if (fp) {
+        fprintf(fp, "\n=== Sales Query ===\n");
+    }
+    
     while (p) {
         char timeStr[32] = "";
         if (strlen(p->data.time) > 0) {
-            time_t t = atol(p->data.time);
-            struct tm* timeinfo = localtime(&t);
+            time_t tt = atol(p->data.time);
+            struct tm* timeinfo = localtime(&tt);
             strftime(timeStr, sizeof(timeStr), "%Y/%m/%d %H:%M:%S", timeinfo);
         }
-        printf("卡号: %s, 类型: %s, 金额: %.2f, 余额: %.2f, 时间: %s\n",
+        char typeStr[16];
+        if (p->data.type == 1) strcpy(typeStr, "Recharge");
+        else if (p->data.type == 2) strcpy(typeStr, "Refund");
+        else strcpy(typeStr, "Consume");
+        
+        char line[128];
+        sprintf(line, "Card: %s, Type: %s, Amount: %.2f, Balance: %.2f, Time: %s\n",
                p->data.cardId,
-               p->data.type == 1 ? "充值" : (p->data.type == 2 ? "退费" : "消费"),
+               typeStr,
                p->data.amount,
                p->data.balanceAfter,
                timeStr);
+        printf("%s", line);
+        if (fp) fprintf(fp, "%s", line);
         count++;
         p = p->next;
     }
     printf("共 %d 条记录\n", count);
+    if (fp) {
+        fprintf(fp, "Total: %d records\n", count);
+        fclose(fp);
+    }
     
     char result[32];
-    sprintf(result, "查询到 %d 条记录", count);
-    log_query("查询营业额记录", "ALL", result);
+    sprintf(result, "Found %d records", count);
+    log_query("Sales", "ALL", result);
 }
 
 void crud_user_logs(void) {
@@ -169,8 +208,8 @@ void crud_user_logs(void) {
     printf("共计 %d 个用户\n", cardCount);
     
     char result[32];
-    sprintf(result, "查询到 %d 个用户", cardCount);
-    log_query("用户全记录", "ALL", result);
+    sprintf(result, "Found %d users", cardCount);
+    log_query("UserLogs", "ALL", result);
 }
 
 void crud_user_detail(void) {
@@ -249,6 +288,6 @@ void crud_user_detail(void) {
     printf("共 %d 条记录，充值: %.2f 元，退费: %.2f 元\n", financeCount, totalRecharge, totalRefund);
     
     char result[64];
-    sprintf(result, "卡号: %s, 上机:%d, 财务:%d", cardId, logCount, financeCount);
-    log_query("详细记录", cardId, result);
+    sprintf(result, "Card: %s, Login: %d, Finance: %d", cardId, logCount, financeCount);
+    log_query("Detail", cardId, result);
 }
