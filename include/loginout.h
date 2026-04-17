@@ -1,10 +1,9 @@
-/*
- * loginout.h - 上下机服务菜单
- */
-
 #ifndef LOGINOUT_H
 #define LOGINOUT_H
 
-void loginout_service(void);
+#include "model.h"
 
-#endif /* LOGINOUT_H */
+int login_on(const char* cardId, const char* password);
+int login_off(const char* cardId);
+
+#endif

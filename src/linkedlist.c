@@ -1,13 +1,3 @@
-/**
- * @file linkedlist.c
- * @brief 通用链表实现 - 使用void*存储数据
- * 
- * 设计思路：
- * - 节点存储void*指针，数据在创建时按指定大小分配
- * - 所有链表操作（create/free/append/find/remove）统一实现
- * - 通过offsetof和memcmp实现通用键值查找
- */
-
 #include "linkedlist.h"
 #include <string.h>
 #include <stdio.h>
@@ -15,13 +5,11 @@
 ListNode* list_node_create(size_t dataSize) {
     ListNode* node = (ListNode*)malloc(sizeof(ListNode));
     if (!node) return NULL;
-    
     node->data = malloc(dataSize);
     if (!node->data) {
         free(node);
         return NULL;
     }
-    
     memset(node->data, 0, dataSize);
     node->next = NULL;
     return node;
