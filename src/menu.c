@@ -8,8 +8,58 @@
 #include "utils.h"
 #include "billing.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+static AccountNode* card_list_head = NULL;
+
+void card_list_set_head(AccountNode* h) {
+    card_list_head = h;
+}
+
+AccountNode* card_list_get_head(void) {
+    return card_list_head;
+}
+
+static AccountNode* card_list_find(const char* cardId) {
+    AccountNode* p = card_list_head;
+    while (p) {
+        if (strcmp(p->data.aName, cardId) == 0) {
+            return p;
+        }
+        p = p->next;
+    }
+    return NULL;
+}
+
+static int card_list_add(Account* acc) {
+    if (card_list_find(acc->aName)) {
+        return 0;
+    }
+    
+    AccountNode* node = (AccountNode*)malloc(sizeof(AccountNode));
+    node->data = *acc;
+    node->next = NULL;
+    
+    if (!card_list_head) {
+        card_list_head = node;
+    } else {
+        AccountNode* p = card_list_head;
+        while (p->next) p = p->next;
+        p->next = node;
+    }
+    return 1;
+}
+
+static int card_list_delete(const char* cardId) {
+    AccountNode* p = card_list_find(cardId);
+    if (p) {
+        p->data.nDel = 1;
+        return 1;
+    }
+    return 0;
+}
 
 void load_data(void) {
     card_set_head(load_accounts());
@@ -26,11 +76,12 @@ void card_list_menu(void) {
         printf("\n=== 卡务管理（链表） ===\n");
         printf("1. 注册新卡\n");
         printf("2. 查询卡信息\n");
-        printf("3. 列出所有卡\n");
-        printf("4. 注销卡\n");
+        printf("3. 更改卡信息\n");
+        printf("4. 列出所有卡\n");
+        printf("5. 注销卡\n");
         printf("0. 返回\n");
         
-        int choice = get_choice(0, 4);
+        int choice = get_choice(0, 5);
         if (choice == 0) break;
         
         char cardId[CARD_ID_MAX_LEN + 1];
@@ -55,7 +106,7 @@ void card_list_menu(void) {
                 acc.fBalance = 0;
                 acc.nDel = 0;
                 
-                if (card_add(&acc)) {
+                if (card_list_add(&acc)) {
                     printf("注册成功！\n");
                 } else {
                     printf("注册失败，卡号已存在！\n");
@@ -66,7 +117,7 @@ void card_list_menu(void) {
                 printf("\n查询卡信息\n");
                 get_string("请输入卡号: ", cardId, sizeof(cardId));
                 {
-                    AccountNode* p = card_find(cardId);
+                    AccountNode* p = card_list_find(cardId);
                     if (p && p->data.nDel == 0) {
                         printf("\n卡号: %s\n", p->data.aName);
                         printf("状态: %s\n", p->data.nStatus[0] == '0' ? "未上机" : 
@@ -80,9 +131,52 @@ void card_list_menu(void) {
                 break;
                 
             case 3:
+                printf("\n更改卡信息\n");
+                get_string("请输入卡号: ", cardId, sizeof(cardId));
+                {
+                    AccountNode* p = card_list_find(cardId);
+                    if (!p) {
+                        printf("账户不存在！\n");
+                        break;
+                    }
+                    if (p->data.nDel == 1) {
+                        printf("该账户已注销！\n");
+                        break;
+                    }
+                    printf("请选择需要修改的部分：\n");
+                    printf("1. 密码\n");
+                    printf("2. 状态\n");
+                    int cmd = get_int("输入数字标号：");
+                    switch (cmd) {
+                        case 1:
+                            get_string("请输入新密码: ", password, sizeof(password));
+                            strcpy(p->data.aPwd, password);
+                            printf("密码修改成功！\n");
+                            break;
+                        case 2:
+                            {
+                                printf("当前状态: %s\n", p->data.nStatus[0] == '0' ? "未上机" : 
+                                                                p->data.nStatus[0] == '1' ? "上机中" : "已注销");
+                                int newStatus = get_int("修改卡号状态（0-未上机，1-上机中，2-已注销，3-失效）：");
+                                if (newStatus >= 0 && newStatus <= 3) {
+                                    sprintf(p->data.nStatus, "%d", newStatus);
+                                    printf("状态修改成功！\n");
+                                } else {
+                                    printf("状态值无效！\n");
+                                }
+                            }
+                            break;
+                        default:
+                            printf("无效的选项！\n");
+                            break;
+                    }
+                }
+                break;
+                
+            case 4:
                 printf("\n所有卡列表:\n");
                 {
-                    AccountNode* p = card_get_head();
+                    AccountNode* p = card_list_head;
                     int count = 0;
                     while (p) {
                         if (p->data.nDel == 0) {
@@ -99,10 +193,10 @@ void card_list_menu(void) {
                 }
                 break;
                 
-            case 4:
+            case 5:
                 printf("\n注销卡\n");
                 get_string("请输入卡号: ", cardId, sizeof(cardId));
-                if (card_delete(cardId)) {
+                if (card_list_delete(cardId)) {
                     printf("注销成功！\n");
                 } else {
                     printf("账户不存在！\n");
