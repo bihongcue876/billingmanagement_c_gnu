@@ -63,4 +63,28 @@ typedef struct FinanceNode {
     struct FinanceNode* next;
 } FinanceNode;
 
+typedef struct {
+    char packageId[32];
+    char packageName[64];
+    double unitPrice;
+    int nDel;
+} Billing;
+
+typedef struct {
+    double startHour;
+    double endHour;
+    double pricePerHour;
+} BillingSegment;
+
+#define MAX_SEGMENTS 10
+#define MAX_PLANS 20
+
+typedef struct {
+    char planId[32];
+    char planName[64];
+    int segmentCount;
+    BillingSegment segments[MAX_SEGMENTS];
+    int nDel;
+} BillingStandard;
+
 #endif

@@ -51,6 +51,84 @@ AccountNode* load_accounts(void) {
     return head;
 }
 
+int save_billing(BillingStandard* standards, int count) {
+    ensure_data_dir();
+    FILE* fp = fopen(BILLING_FILE, "w");
+    if (!fp) return 0;
+    
+    fprintf(fp, "%d\n", count);
+    for (int i = 0; i < count; i++) {
+        fprintf(fp, "%s %s %d %d\n", 
+                standards[i].planId,
+                standards[i].planName,
+                standards[i].segmentCount,
+                standards[i].nDel);
+        for (int j = 0; j < standards[i].segmentCount; j++) {
+            fprintf(fp, "%lf %lf %lf\n", 
+                    standards[i].segments[j].startHour,
+                    standards[i].segments[j].endHour,
+                    standards[i].segments[j].pricePerHour);
+        }
+    }
+    
+    fclose(fp);
+    return count;
+}
+
+int load_billing(BillingStandard* standards, int* count) {
+    FILE* fp = fopen(BILLING_FILE, "r");
+    if (!fp) return 0;
+    
+    if (fscanf(fp, "%d", count) != 1) {
+        fclose(fp);
+        return 0;
+    }
+    
+    for (int i = 0; i < *count; i++) {
+        fscanf(fp, "%s %s %d %d", 
+               standards[i].planId,
+               standards[i].planName,
+               &standards[i].segmentCount,
+               &standards[i].nDel);
+        for (int j = 0; j < standards[i].segmentCount; j++) {
+            fscanf(fp, "%lf %lf %lf", 
+                   &standards[i].segments[j].startHour,
+                   &standards[i].segments[j].endHour,
+                   &standards[i].segments[j].pricePerHour);
+        }
+    }
+    
+    fclose(fp);
+    return *count;
+}
+
+int save_admins(Admin* admins, int count) {
+    ensure_data_dir();
+    FILE* fp = fopen(ADMIN_FILE, "w");
+    if (!fp) return 0;
+    
+    for (int i = 0; i < count; i++) {
+        fprintf(fp, "%s %s %s\n", admins[i].username, admins[i].password, admins[i].createTime);
+    }
+    
+    fclose(fp);
+    return count;
+}
+
+int load_admins(Admin* admins, int* count) {
+    FILE* fp = fopen(ADMIN_FILE, "r");
+    if (!fp) return 0;
+    
+    *count = 0;
+    while (fscanf(fp, "%s %s %s", admins[*count].username, admins[*count].password, admins[*count].createTime) == 3) {
+        (*count)++;
+        if (*count >= 10) break;
+    }
+    
+    fclose(fp);
+    return *count;
+}
+
 int save_finance(FinanceNode* head) {
     ensure_data_dir();
     FILE* fp = fopen(FINANCE_FILE, "wb");

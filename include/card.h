@@ -10,5 +10,6 @@ AccountNode* card_list(void);
 int card_add(Account* acc);
 int card_delete(const char* cardId);
 int card_update(Account* acc);
+int card_search(const char* cardId);
 
 #endif

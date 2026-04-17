@@ -1,11 +1,15 @@
 #include "loginout.h"
 #include "card.h"
 #include "fileio.h"
+#include "billing.h"
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
 
-static float unit_price = 1.0f;
+float calculate_amount(double minutes) {
+    double hours = minutes / 60.0;
+    return (float)calculate_fee(hours);
+}
 
 int login_on(const char* cardId, const char* password) {
     AccountNode* p = card_find(cardId);
@@ -54,9 +58,9 @@ int login_off(const char* cardId) {
     
     time_t now = time(NULL);
     double minutes = difftime(now, p->data.tStart) / 60.0;
-    if (minutes < 1) minutes = 1;
     
-    float amount = (float)(minutes * unit_price);
+    float amount = calculate_amount(minutes);
+    
     if (amount > p->data.fBalance) {
         amount = p->data.fBalance;
     }
@@ -76,6 +80,6 @@ int login_off(const char* cardId) {
     log.fBalance = p->data.fBalance;
     append_loginfo(&log);
     
-    printf("下机成功！消费 %.2f 元，余额 %.2f 元\n", amount, p->data.fBalance);
+    printf("下机成功！消费 %.2f 元（%.0f分钟），余额 %.2f 元\n", amount, minutes, p->data.fBalance);
     return 1;
 }

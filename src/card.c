@@ -84,3 +84,17 @@ int card_update(Account* acc) {
     }
     return 0;
 }
+
+int card_search(const char* cardId) {
+    AccountNode* p = head;
+    while (p) {
+        if (strcmp(p->data.aName, cardId) == 0) {
+            if (p->data.nDel == 1) {
+                return 2;
+            }
+            return 1;
+        }
+        p = p->next;
+    }
+    return 0;
+}
